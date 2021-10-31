@@ -6,7 +6,7 @@ from Naked.toolshed.shell import execute_js
 load_dotenv()
 WALLET_ADDRESS = os.getenv("WALLET_ADDRESS")
 ETHERSCAN_API_KEY = os.getenv("ETHERSCAN_API_KEY")
-DATAPULL_INTERVAL_MINUTES = 5
+DATAPULL_INTERVAL_MINUTES = 1
 DEBUG = False
 
 # Get Account's Opensea Collection Data
@@ -66,8 +66,7 @@ def getTotalAssetsValue(assets_data):
 
 # Get user ETH balance
 def getEthBalance(address=WALLET_ADDRESS):
-    #url = f'http://api.etherscan.io/api?module=account&action=balance&address={address}&tag=latest'
-    url = f'https://api.etherscan.io/api?module=account&action=balance&address={address}&tag=latest&apikey=YourApiKeyToken'
+    url = f'https://api.etherscan.io/api?module=account&action=balance&address={address}&tag=latest&apikey={ETHERSCAN_API_KEY}'
     bal_eth = int(requests.request("GET", url).json()['result'])
     bal_eth = bal_eth / (10 ** 18)
     return bal_eth

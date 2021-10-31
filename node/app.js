@@ -1,7 +1,12 @@
-require('dotenv').config()
+require('dotenv').config({ path: '../.env' })
 const StreamrClient = require('streamr-client')
 var fs = require('fs')
 
+const client = new StreamrClient({
+    auth: {
+        privateKey: process.env.STREAMR_PRIVATE_KEY,
+    }
+})
 
 const publishDataToStream = async data => {
     return new Promise( (resolve, reject) => {
@@ -12,12 +17,6 @@ const publishDataToStream = async data => {
         if (!process.env['STREAMR_ID']) {
             reject(new Error('Streamr Stream ID is required'))
         }
-
-        const client = new StreamrClient({
-            auth: {
-                privateKey: process.env.STREAMR_PRIVATE_KEY,
-            }
-        })
 
         client.publish(process.env['STREAMR_ID'], data)
             .then(() => resolve(data))

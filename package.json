@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "api": "^3.4.2",
-    "dotenv": "^10.0.0",
-    "node-cron": "^3.0.0",
-    "opensea-js": "^1.2.1",
-    "streamr-client": "^5.4.5"
-  }
-}
