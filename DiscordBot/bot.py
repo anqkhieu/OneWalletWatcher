@@ -1,13 +1,18 @@
 import discord
 from discord.ext import commands
 
-import asyncio, os, json, time
+import asyncio, os, json, time, requests
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 from dotenv import load_dotenv
 from datetime import datetime
 from Naked.toolshed.shell import execute_js
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from PIL import Image
 
 load_dotenv('../.env')
 BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
@@ -156,26 +161,37 @@ async def graph(ctx, min=60, type='usd'):
     embed = discord.Embed(description = content, colour=discord.Colour.green())
     message = await ctx.send(embed=embed)
 
+def getTokenPrice(token):
+    token_url = f'https://api.coingecko.com/api/v3/simple/price?ids={token}&vs_currencies=usd'
+    price = json.loads(requests.request("GET", token_url).text)[f'{token}']['usd']
+    return price
+
 @client.command()
-async def news(ctx,):
-    total_eth_value, total_usd_value = generate_graph(type, int(min))
-    chart = discord.File("graph.png", filename="graph.png")
-    await ctx.send(file=chart)
-
-    address = os.getenv("WALLET_ADDRESS")
-
-    if type == 'usd': percent_change = ((total_eth_value[-1] - total_eth_value[0]) / total_eth_value[-1]) * 100
-    else: percent_change = ((total_usd_value[-1] - total_usd_value[0]) / total_usd_value[-1]) * 100
-    if percent_change >= 0: sign = '+'
-    else: sign = ''
+async def news(ctx, query):
+    await ctx.send("*Querying... Stand by.*")
+    chrome_options = Options()
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options= chrome_options)
+    driver.get(f"https://cointelegraph.com/search?query={query}")
+    driver.maximize_window()
+    time.sleep(2.5)
+    btn = driver.find_element_by_xpath('/html/body/main/div[3]/div/div/div/div[2]/button[1]')
+    btn.click()
+    time.sleep(2.5)
+    driver.save_screenshot("news.png")
+    driver.quit()
 
     content = (
-        f"📈 __**PORTFOLIO PERFORMANCE (Last {min} Minutes)**__ \n\
-        \n*Address:* \n`{address}` \n\
-        \n*Average Portfolio Value:* \n `{round(sum(total_eth_value)/len(total_eth_value), 4)} ETH` or `{round(sum(total_usd_value)/len(total_usd_value), 4)} USD` \
-        \n\nLast {min} Minutes: {sign}{round(percent_change, 4)}%"
+        f"📰 __**{query.upper()}: IN THE NEWS**__ \n\
+        \n*Price:* ${round(getTokenPrice(query), 4)}\
+        \n[Read More](https://cointelegraph.com/search?query={query}) | [View on CoinGecko](https://www.coingecko.com/en/coins/{query})"
     )
     embed = discord.Embed(description = content, colour=discord.Colour.green())
-    message = await ctx.send(embed=embed)
+    file = discord.File("news.png", filename="news.png")
+    embed.set_image(url="attachment://news.png")
+    message = await ctx.send(file=file, embed=embed)
 
 client.run(BOT_TOKEN)
