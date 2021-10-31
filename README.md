@@ -1,6 +1,6 @@
 # One Wallet Watcher
 
- Collect your portfolio performance minute-to-minute! Easily track the average value of all your tokens by storing this data on the Streamr blockchain. Powered by the Opensea API and Etherscan API, and scripted with Python and Node JS.
+Make portfolio analysis and asset valuations fast, free, and easy! Create new wallets, get your portfolio performance minute-to-minute, distill relevant investment info, curate blockchain and crypto news, and more-- all with a Discord bot.
 
  Commented code and easily editable!
  Feel free to fork.
